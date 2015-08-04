@@ -1,0 +1,20 @@
+@import url(http://fonts.googleapis.com/css?family=Fira+Sans:400,700,400italic,700italic);
+
+body {
+	font-family: 'Fira Sans', "Helvetica Neue", Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+p {
+	width: 600px;
+	font-size: 14px;
+}
+
+div {
+	padding-bottom: 30px;
+}
+
+div#pieBySender, #barBySender, #pieByTime, #timeseries {
+	text-align: center;
+}
+

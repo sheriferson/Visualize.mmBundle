@@ -1,0 +1,10 @@
+{
+	name          = 'Emails by time';
+	input         = 'formatted';
+	keyEquivalent = "^t";
+	uuid          = '82B369F4-7281-4C55-93C3-71779ACBB432';
+
+	formatString  = '"${from.name:?${from.name/"/""/g}:${from.address/"/""/g}}","${from.address/"/""/g}","${subject/"/""/g}","${#mailer.name/"/""/g}",${#date.#local},1';
+	executionMode = 'multipleMessages';
+	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display" byTime\n';
+}

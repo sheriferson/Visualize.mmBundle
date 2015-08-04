@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="../style.css">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="../utilities/saveSvgAsPng.js"></script>
+	<script src="../utilities/url_object.js"></script>
+	<title>Your email visualized by sender</title>
+</head>
+<body>
+	
+	<h1>Glances at your email</h1>
+
+	<p>Hover over the piechart and scatterplot for more information.</p>
+
+	<h2>Pie chart of messages by sender</h2>
+	<button id="savePie">Save as Image</button>
+	<div id="pieBySender"></div>
+
+	<h2>Bar chart of messages by sender</h2>
+	<button id="saveBar">Save as Image</button>
+	<div id="barBySender"></div>
+
+	<script type="text/javascript" src="bySender.js"></script>
+	
+</body>
+</html>
