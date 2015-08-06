@@ -9,13 +9,16 @@ osascript <<END
 tell application "Safari"
 	set new_url to "file://${MM_BUNDLE_SUPPORT// /%20}/HTML/${DISPLAY_TYPE}/index.html?csv_file=${FILEPATH}"
 	set old_url to missing value
-	if exists (front document)
-		set old_url to URL of front document
+	if exists (front document) then
+		if exists URL of front document then
+			set old_url to URL of front document
+		end if
 	end if
 	if old_url is missing value or new_url is not equal to old_url then
 		make new document with properties {URL:new_url}
+		activate
 	else
-        do JavaScript "window.location.reload(true)" in front document
+		do JavaScript "window.location.reload(true)" in front document
 	end if
 end tell
 END
