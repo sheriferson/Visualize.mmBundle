@@ -12,6 +12,10 @@
 	<script src="../utilities/saveSvgAsPng.js"></script>
 	<script src="../utilities/url_object.js"></script>
 	<script src="../utilities/lodash.min.js"></script>
+	<script src="../utilities/jquery-1.12.0.min.js"></script>
+	<script src="../utilities/spectrum.js"></script>
+	<link rel='stylesheet' href='../utilities/spectrum.css' />
+
 	<title>Your email visualized</title>
 </head>
 <body>
@@ -25,8 +29,11 @@
 	<div id="pieByTime"></div>	
 
 	<h2>Time series/scatterplot of messages by date and time of day</h2>
-	<button id="saveTimeSeries">Save as Image</button>
 
+	Choose your color: <input type="text" id="colorpicker" />
+	
+	<button id="saveTimeSeries">Save as Image</button>
+	
 	<div id="timeseries"></div>
 
 	<script type="text/javascript" src="byTime.js"></script>

@@ -224,7 +224,7 @@ function seriesTime() {
         .attr("class", "dot")
         .attr("r", 2 )
         .style("opacity", 0.9)
-        .style("fill", color(5) )
+        .style("fill", color(3) )
         .attr("cx", function(d) { return x(d.date); })
         .attr("cy", function(d) { return y(d.time); })
 
@@ -253,7 +253,7 @@ function seriesTime() {
         .on('mouseout', function(d) {
             d3.select(this).transition().duration(100)
                 .attr('r', 2)
-                .style('fill', color(5))
+                .style('fill', color(3))
 
         seriesTooltip.html()
         seriesTooltip.transition()
@@ -345,8 +345,9 @@ function seriesTime() {
             .style('stroke', '#000')
 
     timeGraph.append('path')
+        .attr('id', 'lineplot')
         .attr('d', linePlotFunc(cleanedData) )
-        .attr('stroke', color(5))
+        .attr('stroke', color(3))
         .attr('fill', 'none')
         .style('stroke-width', 1.5)
 
@@ -368,3 +369,22 @@ d3.select('#savePieTime').on('click', function() {
 d3.select('#saveTimeSeries').on('click', function() {
 	saveSvgAsPng(document.getElementById('timeseriesSVG'), 'email_time_series.png')
 })
+
+// Initialize color picker and act on color changes
+$("#colorpicker").spectrum({
+    showInput: true,
+    showInitial: true,
+    preferredFormat: "hex",
+    color: "#6b486b"
+});
+
+$("#colorpicker").on('change.spectrum', function(e, tinycolor) {
+        var pickedColor = tinycolor.toHexString()
+        console.log(pickedColor);
+
+        d3.select("#timeseries").selectAll('circle')
+            .style('fill', pickedColor)
+
+        d3.select("#lineGraph").selectAll('#lineplot')
+            .style('stroke', pickedColor)
+});

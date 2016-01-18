@@ -10,10 +10,6 @@ p {
 	font-size: 14px;
 }
 
-div {
-	padding-bottom: 30px;
-}
-
 div#pieBySender, #barBySender, #pieByTime, #timeseries {
 	text-align: center;
 }
