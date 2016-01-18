@@ -4,6 +4,11 @@
 	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" href="../style.css">
 	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script>
+		if (typeof d3 === "undefined") {
+			document.write('<script src="../utilities/d3.min.js">\x3C/script>')
+		}
+	</script>
 	<script src="../utilities/saveSvgAsPng.js"></script>
 	<script src="../utilities/url_object.js"></script>
 	<script src="../utilities/lodash.min.js"></script>
