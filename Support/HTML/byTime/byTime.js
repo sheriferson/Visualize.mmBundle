@@ -149,11 +149,12 @@ function seriesTime() {
     //                                      d"     YD                    
     //                                      "Y88888P'                    
 
-    var margin = { top: 60, right: 100, bottom: 60, left: 30 }
-    var timeGraphWidth = 220
+    var margin = { top: 70, right: 100, bottom: 60, left: 30 }
                                                                   
     var width = 900 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom
+        timeGraphWidth = width,
+        timeGraphHeight = 200,
+        height = 800 - timeGraphHeight - margin.top - margin.bottom
 
    	var formatDay_Time = d3.time.format("%H:%M")		// tooltip time
     var formatWeek_Year = d3.time.format("%B %d, %Y")	// tooltip date
@@ -170,18 +171,20 @@ function seriesTime() {
     	.scale(x)
     	.orient('bottom')
     	.ticks(10)
+        .outerTickSize(0)
 
     var yAxis = d3.svg.axis()
     	.scale(y)
     	.orient('right')
     	.ticks(24)
+        .outerTickSize(0)
     	.tickFormat(formatDay_Time)
 
     var svg = d3.select('#timeseries').append('svg')
     	.attr('id', 'timeseriesSVG')
         .style('background-color', 'white')
     	.attr('width', width + margin.left + margin.right)
-    	.attr('height', height + margin.top + margin.bottom)
+    	.attr('height', height + timeGraphHeight + margin.top + margin.bottom)
     	.append('g')
     		.attr('class', "timeSeriesG")
     		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
@@ -203,7 +206,7 @@ function seriesTime() {
 
     svg.append("g")
         .attr("class", "y axis")
-        .attr("transform", "translate("  + (width+15) +  ",0)")
+        .attr("transform", "translate("  + (width + 15) +  ",0)")
         .call(yAxis)
         .selectAll('path')
         	.style('fill', 'none')
@@ -244,7 +247,7 @@ function seriesTime() {
 
     	seriesTooltip.html(d.name + "</br>" + d.subjectLine + "</br>" + formatWeek_Year(d.date) + "</br>" + formatDay_Time(d.time))
       		.style('left', (d3.event.pageX - 55) + 'px')
-      		.style('top', (d3.event.pageY - 80) + 'px')
+      		.style('top', (d3.event.pageY - 90) + 'px')
       	})
 
         .on('mouseout', function(d) {
@@ -256,8 +259,101 @@ function seriesTime() {
         seriesTooltip.transition()
             .style('opacity', 0)
       })
-}
 
+    // extend axes with lines for separation
+    d3.select('#timeseriesSVG').append('line')
+        .style('stroke', 'black')
+        .attr('x1', width + margin.left)
+        .attr('y1', height + margin.top + 5)
+        .attr('x2', width + margin.left + 80)
+        .attr('y2', height + margin.top + 5)
+
+    d3.select('#timeseriesSVG').append('line')
+        .style('stroke', 'black')
+        .attr('x1', width + margin.left + 15)
+        .attr('y1', height + margin.top)
+        .attr('x2', width + margin.left + 15)
+        .attr('y2', height + margin.top + 55)
+
+    
+    // oooo   o8o                        
+    // `888   `"'                        
+    //  888  oooo  ooo. .oo.    .ooooo.  
+    //  888  `888  `888P"Y88b  d88' `88b 
+    //  888   888   888   888  888ooo888 
+    //  888   888   888   888  888    .o 
+    // o888o o888o o888o o888o `Y8bod8P' 
+
+
+    d3.selectAll('#timeseriesSVG').append('g')
+        .attr('id', 'lineGraph')
+        .attr('transform', 'translate(' + margin.left + ',' + (height + margin.top + 55) + ')')
+        .append('rect')
+            .attr('height', timeGraphHeight)
+            .attr('width', timeGraphWidth)
+            .style('fill', 'none')
+
+    // aggregate totals by day
+   var lineData = d3.nest()
+        .key(function(d) { return d.date; })
+        .rollup(function(d) {
+            return d3.sum(d, function(g) { return g.count; })
+    })
+    .entries(emails);
+
+    lineData.forEach(function(d) {
+        d.key = new Date(d.key)
+    })    
+
+    // sort lineData by date
+    lineData.sort(function compareNumbers(a, b) {
+        return a.key - b.key
+    })
+
+    var earliest = d3.min(lineData, function(d) { return d.key; })
+    var latest = d3.max(lineData, function(d) { return d.key; })
+
+    var dirtyLineXRange = d3.time.scale().domain(d3.extent(lineData, function(d) { return d.key; })).range([0, timeGraphWidth])
+
+    // fill in missing days with value of 0 emails
+    var cleanedData = dirtyLineXRange.ticks(d3.time.day, 1).map(function(iteratedDay) {
+        return _.find(lineData, {key: iteratedDay}) || {key: iteratedDay, values: 0}
+    })
+
+    var lineXRange = d3.time.scale().domain(d3.extent(cleanedData, function(d) { return d.key; })).range([0, timeGraphWidth])    
+    var lineYRange = d3.scale.linear().domain([0, d3.max(cleanedData, function(d) { return d.values; })]).range([timeGraphHeight, 0])
+
+    lineYAxis = d3.svg.axis()
+        .scale(lineYRange)
+        .ticks(10)
+        .tickPadding(10)
+        .outerTickSize(0)
+        .orient('right')
+
+    var linePlotFunc = d3.svg.line()
+        .x(function(d) { return lineXRange(d.key); })
+        .y(function(d) { return lineYRange(d.values); })
+        .interpolate('linear')
+
+    timeGraph = d3.select("#lineGraph")
+
+    timeGraph.append('g')
+        .attr('transform', 'translate(' + (timeGraphWidth + 15) + ',0)' )
+        .call(lineYAxis)
+            .selectAll('path')
+            .style('fill', 'none')
+            .style('stroke', '#000')
+
+    timeGraph.append('path')
+        .attr('d', linePlotFunc(cleanedData) )
+        .attr('stroke', color(5))
+        .attr('fill', 'none')
+        .style('stroke-width', 1.5)
+
+    timeGraph.selectAll('text')
+        .style('font-size', '12px')               // need to set these for savetopng to work
+        .style('font-family', '-apple-system')    // need to set these for savetopng to work
+}
 
 //  .oooo.o  .oooo.   oooo    ooo  .ooooo.  
 // d88(  "8 `P  )88b   `88.  .8'  d88' `88b 
