@@ -6,5 +6,5 @@
 
 	formatString  = '"${from.name:?${from.name/"/""/g}:${from.address/"/""/g}}","${from.address/"/""/g}","${subject/"/""/g}","${#mailer.name/"/""/g}",${#date.#local},1';
 	executionMode = 'multipleMessages';
-	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display" byTime\n';
+	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display-time" byTime\n';
 }

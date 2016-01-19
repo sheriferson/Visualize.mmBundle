@@ -4,7 +4,7 @@
 	keyEquivalent = "^b";
 	uuid          = '87660C0C-72A1-4CD0-B102-0632890942E4';
 
-	formatString  = '"${from.name:?${from.name/"/""/g}:${from.address/"/""/g}}","${from.address/"/""/g}","${subject/"/""/g}","${#mailer.name/"/""/g}",${#date},1';
+	formatString  = '"${from.name:?${from.name/"/""/g}:${from.address/"/""/g}}","${from.address/"/""/g}","${subject/"/""/g}","${#mailer.name/"/""/g}",1';
 	executionMode = 'multipleMessages';
-	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display" bySender\n';
+	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display-sender" bySender\n';
 }
