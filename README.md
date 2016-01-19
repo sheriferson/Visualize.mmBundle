@@ -28,7 +28,7 @@ Have fun :)
 
 # To do
 
-- [ ] Allow color customization of scatterplot and line graphs.
+- [x] Allow color customization of scatterplot and line graphs.
 - [ ] Make line graph smarter in choosing time intervals to plot (as opposed to day by day as it is now).
 - [ ] Plot of recipients in sent email (#3).
 - [ ] Separate plots by year (#3).
