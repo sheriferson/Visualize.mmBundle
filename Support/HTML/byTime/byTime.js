@@ -7,10 +7,56 @@ var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 d3.csv(urlObject().parameters.csv_file, function(data) {
     emails = data
+
+    // filter out emails with missing date headers
+    // (which is a thing that happens)
+    emails = sanitizeEmails(emails)
     pieByDays(emails)
     seriesTime(emails)
 })
 
+//                                 o8o  
+//                                 `"'  
+//  .oooo.o  .oooo.   ooo. .oo.   oooo  
+// d88(  "8 `P  )88b  `888P"Y88b  `888  
+// `"Y88b.   .oP"888   888   888   888  
+// o.  )88b d8(  888   888   888   888  
+// 8""888P' `Y888""8o o888o o888o o888o 
+
+function sanitizeEmails(emails) {
+    var originalCount = emails.length
+    emails = emails.filter(function(ems) {
+        return ems.localDateTime != "";
+    })
+    var newCount = emails.length
+    var excludedCount = originalCount - newCount
+
+    if (excludedCount > 0) {
+        if (excludedCount < 2) {
+            var datemessage = " message was missing a date header and was excluded."
+        } else {
+            var datemessage = " messages were missing a date header and were excluded."
+        }
+
+        d3.select('#excludedEmails')
+            .style('color', 'white')
+            .style('background-color', '#c43c35')
+            .style('text-transform', 'uppercase')
+            .style('border-radius', '3px')
+            .style('padding-left', '5px')
+            .style('padding-right', '5px')
+            .style('display', 'inline-block')
+            .append('p')
+            .html("<b>" + 
+                  excludedCount +
+                  "</b>" +
+                  datemessage)
+    } else { // no excluded emails, delete excludedEmails div
+        d3.select('#excludedEmails').remove()
+    }
+
+    return emails
+}
 
 //        .o   .o               o8o        .o8                                 
 //       .8'  .8'               `"'       "888                                 
