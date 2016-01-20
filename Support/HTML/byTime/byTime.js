@@ -5,7 +5,11 @@ var color = d3.scale.ordinal()
 // days of the week corresponding to the integer returned by [date].getDay()
 var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
-d3.csv(urlObject().parameters.csv_file, function(data) {
+// Safari will cache the data file for a long time
+// unless:
+datafile = urlObject().parameters.csv_file + '?nocache=' + (new Date()).getTime()
+
+d3.csv(datafile, function(data) {
     emails = data
 
     // filter out emails with missing date headers
