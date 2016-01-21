@@ -10,7 +10,7 @@ var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 datafile = urlObject().parameters.csv_file + '?nocache=' + (new Date()).getTime()
 
 d3.csv(datafile, function(data) {
-    emails = data
+    var emails = data
 
     // filter out emails with missing date headers
     // (which is a thing that happens)
@@ -72,7 +72,7 @@ function sanitizeEmails(emails) {
 //                   888                                  .o..P'               
 //                  o888o                                 `Y8P'                
                                                                             
-function pieByDays() {
+function pieByDays(emails) {
 	// some functions to parse the date
 	parseDate = d3.time.format("%Y-%m-%d").parse
 	parseTime = d3.time.format("%H:%M:%S").parse
@@ -187,7 +187,7 @@ function pieByDays() {
 //  .8'  .8'        8""888P' `Y8bod8P' d888b    o888o `Y8bod8P' 8""888P' 
 
 
-function seriesTime() {
+function seriesTime(emails) {
 
     //                                                  o8o              
     //                                                  `"'              
