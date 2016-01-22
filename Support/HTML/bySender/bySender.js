@@ -140,6 +140,35 @@ function barBySender(emails) {
         return b.values - a.values;
     })
 
+    // limit number of senders represented in bar graph to 50
+    var originalSenderNumber = data.length
+    if (originalSenderNumber > 50)
+    {
+      data = data.slice(0, 50)
+      var excludedSenderNumber = originalSenderNumber - data.length
+
+      if (excludedSenderNumber < 2) {
+        var exSenderMessage = " sender couldn't fit in the bar graph and was excluded."
+      } else {
+        exSenderMessage = " senders couldn't fit in the bar graph and were excluded."
+      }
+
+      d3.select('#excludedSenders')
+        .style('fill', '#000')
+        .style('color', '#c43c35')
+        .style('border-radius', '3px')
+        .style('padding-left', '5px')
+        .style('padding-right', '5px')
+        .style('display', 'inline-block')
+        .append('p')
+        .html("<b>" + 
+              excludedSenderNumber +
+              "</b>" +
+              exSenderMessage)
+    } else {
+      d3.select('#excludedSenders').remove()
+    }
+
     //                                                  o8o              
     //                                                  `"'              
     // ooo. .oo.  .oo.    .oooo.   oooo d8b  .oooooooo oooo  ooo. .oo.   
@@ -261,8 +290,6 @@ function barBySender(emails) {
 
 }
 
-                                         
-                                         
 //  .oooo.o  .oooo.   oooo    ooo  .ooooo.  
 // d88(  "8 `P  )88b   `88.  .8'  d88' `88b 
 // `"Y88b.   .oP"888    `88..8'   888ooo888 
