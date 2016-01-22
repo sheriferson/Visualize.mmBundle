@@ -52,11 +52,13 @@
     var css = "";
     var sheets = document.styleSheets;
     for (var i = 0; i < sheets.length; i++) {
-      if (isExternal(sheets[i].href)) {
-        console.warn("Cannot include styles from other hosts: "+sheets[i].href);
+      try {
+        var rules = sheets[i].cssRules;
+      } catch (e) {
+        console.warn("Stylesheet could not be loaded: "+sheets[i].href);
         continue;
       }
-      var rules = sheets[i].cssRules;
+
       if (rules != null) {
         for (var j = 0; j < rules.length; j++) {
           var rule = rules[j];
@@ -80,6 +82,24 @@
     return css;
   }
 
+  function getDimension(el, clone, dim) {
+    var v = (el.viewBox.baseVal && el.viewBox.baseVal[dim]) ||
+      (clone.getAttribute(dim) !== null && !clone.getAttribute(dim).match(/%$/) && parseInt(clone.getAttribute(dim))) ||
+      el.getBoundingClientRect()[dim] ||
+      parseInt(clone.style[dim]) ||
+      parseInt(window.getComputedStyle(el).getPropertyValue(dim));
+    return (typeof v === 'undefined' || v === null || isNaN(parseFloat(v))) ? 0 : v;
+  }
+
+  function reEncode(data) {
+    data = encodeURIComponent(data);
+    data = data.replace(/%([0-9A-F]{2})/g, function(match, p1) {
+      var c = String.fromCharCode('0x'+p1);
+      return c === '%' ? '%25' : c;
+    });
+    return decodeURIComponent(data);
+  }
+
   out$.svgAsDataUri = function(el, options, cb) {
     options = options || {};
     options.scale = options.scale || 1;
@@ -90,26 +110,9 @@
       var clone = el.cloneNode(true);
       var width, height;
       if(el.tagName == 'svg') {
-        var box = el.getBoundingClientRect();
-        width = parseInt(clone.getAttribute('width') ||
-          box.width ||
-          clone.style.width ||
-          out$.getComputedStyle(el).getPropertyValue('width'));
-        height = parseInt(clone.getAttribute('height') ||
-          box.height ||
-          clone.style.height ||
-          out$.getComputedStyle(el).getPropertyValue('height'));
-        if (width === undefined || 
-            width === null || 
-            isNaN(parseFloat(width))) {
-      	  width = 0;
-        }
-        if (height === undefined || 
-            height === null || 
-            isNaN(parseFloat(height))) {
-      	  height = 0;
-        }
-      } else {
+        width = options.width || getDimension(el, clone, 'width');
+        height = options.height || getDimension(el, clone, 'height');
+      } else if(el.getBBox) {
         var box = el.getBBox();
         width = box.x + box.width;
         height = box.y + box.height;
@@ -118,6 +121,9 @@
         var svg = document.createElementNS('http://www.w3.org/2000/svg','svg')
         svg.appendChild(clone)
         clone = svg;
+      } else {
+        console.error('Attempted to render non-SVG element', el);
+        return;
       }
 
       clone.setAttribute("version", "1.1");
@@ -125,7 +131,13 @@
       clone.setAttributeNS(xmlns, "xmlns:xlink", "http://www.w3.org/1999/xlink");
       clone.setAttribute("width", width * options.scale);
       clone.setAttribute("height", height * options.scale);
-      clone.setAttribute("viewBox", "0 0 " + width + " " + height);
+      clone.setAttribute("viewBox", [
+        options.left || 0,
+        options.top || 0,
+        width,
+        height
+      ].join(" "));
+
       outer.appendChild(clone);
 
       var css = styles(el, options.selectorRemap);
@@ -137,34 +149,54 @@
       clone.insertBefore(defs, clone.firstChild);
 
       var svg = doctype + outer.innerHTML;
-      var uri = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svg)));
+      var uri = 'data:image/svg+xml;base64,' + window.btoa(reEncode(svg));
       if (cb) {
         cb(uri);
       }
     });
   }
 
-  out$.saveSvgAsPng = function(el, name, options) {
-    options = options || {};
+  out$.svgAsPngUri = function(el, options, cb) {
     out$.svgAsDataUri(el, options, function(uri) {
       var image = new Image();
-      image.src = uri;
       image.onload = function() {
         var canvas = document.createElement('canvas');
         canvas.width = image.width;
         canvas.height = image.height;
         var context = canvas.getContext('2d');
+        if(options && options.backgroundColor){
+          context.fillStyle = options.backgroundColor;
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        }
         context.drawImage(image, 0, 0);
-
-        var a = document.createElement('a');
-        a.download = name;
-        a.href = canvas.toDataURL('image/png');
-        document.body.appendChild(a);
-        a.addEventListener("click", function(e) {
-          a.parentNode.removeChild(a);
-        });
-        a.click();
+        var a = document.createElement('a'), png;
+        try {
+          png = canvas.toDataURL('image/png');
+        } catch (e) {
+          if (e instanceof SecurityError) {
+            console.error("Rendered SVG images cannot be downloaded in this browser.");
+            return;
+          } else {
+            throw e;
+          }
+        }
+        cb(png);
       }
+      image.src = uri;
+    });
+  }
+
+  out$.saveSvgAsPng = function(el, name, options) {
+    options = options || {};
+    out$.svgAsPngUri(el, options, function(uri) {
+      var a = document.createElement('a');
+      a.download = name;
+      a.href = uri;
+      document.body.appendChild(a);
+      a.addEventListener("click", function(e) {
+        a.parentNode.removeChild(a);
+      });
+      a.click();
     });
   }
 })();
