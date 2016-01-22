@@ -2,8 +2,12 @@
 var color = d3.scale.ordinal()
     .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-d3.csv(urlObject().parameters.csv_file, function(data) {
-    emails = data
+// Safari will cache the data file for a long time
+// unless:
+datafile = urlObject().parameters.csv_file + '?nocache=' + (new Date()).getTime()
+
+d3.csv(datafile, function(data) {
+    var emails = data
     pieBySender(emails)
     barBySender(emails)
 })
@@ -18,7 +22,7 @@ d3.csv(urlObject().parameters.csv_file, function(data) {
 //                   888                       
 //                  o888o                      
 
-function pieBySender() {
+function pieBySender(emails) {
 
     // aggregate the count of emails per sender
     var data = d3.nest()
@@ -116,7 +120,7 @@ function pieBySender() {
 //   .8'  .8'        888   888 d8(  888   888     
 //  .8'  .8'         `Y8bod8P' `Y888""8o d888b    
                                                
-function barBySender() {
+function barBySender(emails) {
      // aggregate the count of emails per sender
     var data = d3.nest()
         .key(function(d) { return d.name; })
