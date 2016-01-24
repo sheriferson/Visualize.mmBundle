@@ -179,11 +179,11 @@ function barBySender(emails) {
     //                                      d"     YD                    
     //                                      "Y88888P'                    
 
-    var margin = { top: 30, right: 40, bottom: 170, left: 30 }
+    var margin = { top: 30, right: 40, bottom: 250, left: 70 }
                                                                   
 
     var width = 900 - margin.left - margin.right,
-        height = 600 - margin.top - margin.bottom
+        height = 680 - margin.top - margin.bottom
    
     var xScale = d3.scale.ordinal().domain(d3.range(0,data.length)).rangeBands([0, width], .2);
 
