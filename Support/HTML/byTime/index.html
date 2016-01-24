@@ -38,7 +38,11 @@
 	
 	<div id="timeseries"></div>
 
-	<script type="text/javascript" src="byTime.js"></script>
+	<!-- reference http://stackoverflow.com/a/11467981 -->
+	<script>
+	document.write("<script type='text/javascript' src='byTime.js?v=" + 
+	                       Date.now() + "'><\/script>");
+	</script>
 
 </body>
 </html>
