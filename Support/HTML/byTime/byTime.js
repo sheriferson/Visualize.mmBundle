@@ -5,6 +5,14 @@ var color = d3.scale.ordinal()
 // days of the week corresponding to the integer returned by [date].getDay()
 var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
+// margin and dimensions needed for both scatterplot and linegraph
+var margin = { top: 70, right: 100, bottom: 60, left: 30 }
+                                                              
+var width = 900 - margin.left - margin.right,
+    timeGraphWidth = width,
+    timeGraphHeight = 200,
+    height = 800 - timeGraphHeight - margin.top - margin.bottom
+
 // Safari will cache the data file for a long time
 // unless:
 datafile = urlObject().parameters.csv_file + '?nocache=' + (new Date()).getTime()
@@ -17,6 +25,7 @@ d3.csv(datafile, function(data) {
     emails = sanitizeEmails(emails)
     pieByDays(emails)
     seriesTime(emails)
+    lineTime(emails)
 })
 
 //                                 o8o  
@@ -199,13 +208,6 @@ function seriesTime(emails) {
     //                                      d"     YD                    
     //                                      "Y88888P'                    
 
-    var margin = { top: 70, right: 100, bottom: 60, left: 30 }
-                                                                  
-    var width = 900 - margin.left - margin.right,
-        timeGraphWidth = width,
-        timeGraphHeight = 200,
-        height = 800 - timeGraphHeight - margin.top - margin.bottom
-
    	var formatDay_Time = d3.time.format("%H:%M")		// tooltip time
     var formatWeek_Year = d3.time.format("%B %d, %Y")	// tooltip date
 
@@ -325,7 +327,10 @@ function seriesTime(emails) {
         .attr('x2', width + margin.left + 15)
         .attr('y2', height + margin.top + 55)
 
-    
+}
+
+function lineTime(emails) {
+
     // oooo   o8o                        
     // `888   `"'                        
     //  888  oooo  ooo. .oo.    .ooooo.  
@@ -370,6 +375,26 @@ function seriesTime(emails) {
         return _.find(lineData, {key: iteratedDay}) || {key: iteratedDay, values: 0}
     })
 
+    // implement moving mean
+    var movingMean = []
+    var movingMeanWindow = 10
+
+    // create a moving mean array from cleanData
+    for (var ii = movingMeanWindow; ii < (cleanedData.length - movingMeanWindow); ii++)
+    {
+        var meanSlice = cleanedData.slice(ii, ii + movingMeanWindow);
+        var mean = d3.sum(meanSlice, function(meanSlice) { return meanSlice.values }) / meanSlice.length
+
+        movingMean.push(Math.round(mean * 100) / 100)
+    }
+
+    // transfer values of array to cleanData array
+    for (var ii = movingMeanWindow; ii < (cleanedData.length - movingMeanWindow); ii++)
+    {
+        cleanedData[ii].values = movingMean[ii - movingMeanWindow]
+    }
+
+    // continue with the scales and plotting the line
     var lineXRange = d3.time.scale().domain(d3.extent(cleanedData, function(d) { return d.key; })).range([0, timeGraphWidth])    
     var lineYRange = d3.scale.linear().domain([0, d3.max(cleanedData, function(d) { return d.values; })]).range([timeGraphHeight, 0])
 
@@ -383,7 +408,7 @@ function seriesTime(emails) {
     var linePlotFunc = d3.svg.line()
         .x(function(d) { return lineXRange(d.key); })
         .y(function(d) { return lineYRange(d.values); })
-        .interpolate('linear')
+        .interpolate('monotone')
 
     timeGraph = d3.select("#lineGraph")
 
