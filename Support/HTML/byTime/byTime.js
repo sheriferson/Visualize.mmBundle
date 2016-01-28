@@ -382,17 +382,16 @@ function lineTime(emails) {
 
     if (cleanedData.length > 400 && cleanedData.length < 1000) {
         smooth = true
-    } else if (cleanedData.length < 3000) {
+    } else if (cleanedData.length > 1000 && cleanedData.length < 3000) {
         smooth = true
         movingMeanWindow = 6
     } else if (cleanedData.length > 3000) {
         smooth = true
-        console.log("here")
         movingMeanWindow = 6
     }
 
     if (smooth == true) {
-        // create a moving mean array from cleanData
+        // create a moving mean array from cleanedData
         for (var ii = 0; ii <= cleanedData.length; ii++)
         {
             if (ii < (movingMeanWindow/2)) {
@@ -411,7 +410,7 @@ function lineTime(emails) {
             movingMean.push(Math.round(mean * 100) / 100)
         }
 
-        // transfer values of array to cleanData array
+        // transfer values of array to cleanedData array
         for (var ii = 0; ii < cleanedData.length; ii++)
         {
             cleanedData[ii].values = movingMean[ii]
