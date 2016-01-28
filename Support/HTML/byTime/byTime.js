@@ -377,21 +377,45 @@ function lineTime(emails) {
 
     // implement moving mean
     var movingMean = []
-    var movingMeanWindow = 10
+    var movingMeanWindow = 4
+    var smooth = false
 
-    // create a moving mean array from cleanData
-    for (var ii = movingMeanWindow; ii < (cleanedData.length - movingMeanWindow); ii++)
-    {
-        var meanSlice = cleanedData.slice(ii, ii + movingMeanWindow);
-        var mean = d3.sum(meanSlice, function(meanSlice) { return meanSlice.values }) / meanSlice.length
-
-        movingMean.push(Math.round(mean * 100) / 100)
+    if (cleanedData.length > 400 && cleanedData.length < 1000) {
+        smooth = true
+    } else if (cleanedData.length < 3000) {
+        smooth = true
+        movingMeanWindow = 6
+    } else if (cleanedData.length > 3000) {
+        smooth = true
+        console.log("here")
+        movingMeanWindow = 6
     }
 
-    // transfer values of array to cleanData array
-    for (var ii = movingMeanWindow; ii < (cleanedData.length - movingMeanWindow); ii++)
-    {
-        cleanedData[ii].values = movingMean[ii - movingMeanWindow]
+    if (smooth == true) {
+        // create a moving mean array from cleanData
+        for (var ii = 0; ii <= cleanedData.length; ii++)
+        {
+            if (ii < (movingMeanWindow/2)) {
+                var meanSlice = cleanedData.slice(0,
+                                                  movingMeanWindow - ii);
+            } else if (ii > (cleanedData.length - movingMeanWindow)) {
+                var meanSlice = cleanedData.slice(cleanedData.length - movingMeanWindow - ii,
+                                                  cleanedData.length);
+            } else {
+                var meanSlice = cleanedData.slice(ii - (movingMeanWindow/2), 
+                                                  ii + (movingMeanWindow/2));            
+            }
+
+            var mean = d3.sum(meanSlice, function(meanSlice) { return meanSlice.values }) / meanSlice.length
+
+            movingMean.push(Math.round(mean * 100) / 100)
+        }
+
+        // transfer values of array to cleanData array
+        for (var ii = 0; ii < cleanedData.length; ii++)
+        {
+            cleanedData[ii].values = movingMean[ii]
+        }
     }
 
     // continue with the scales and plotting the line
