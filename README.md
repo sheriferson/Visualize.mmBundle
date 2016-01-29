@@ -8,6 +8,14 @@ Visualize email history and trends.
 
 ![Scatterplot of selected emails over time](screenshots/by_time_scatterplot.png)
 
+You can change colors.
+
+![Different color](screenshots/by_time_scatterplot_pink.png)
+
+And even plot a moving average instead of raw numbers.
+
+![Moving average](screenshots/by_time_scatterplot_pink_movmean.png)
+
 # Installation
 
 You can install this bundle in MailMate by opening the preferences and going to the bundles tab. After installation it will be automatically updated for you.

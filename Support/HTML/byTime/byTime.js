@@ -277,7 +277,7 @@ function seriesTime(emails) {
         .attr("class", "dot")
         .attr("r", 2 )
         .style("opacity", 0.9)
-        .style("fill", color(3) )
+        .style("fill", "#33a3cc" )
         .attr("cx", function(d) { return x(d.date); })
         .attr("cy", function(d) { return y(d.time); })
 
@@ -306,7 +306,7 @@ function seriesTime(emails) {
         .on('mouseout', function(d) {
             d3.select(this).transition().duration(100)
                 .attr('r', 2)
-                .style('fill', color(3))
+                .style('fill', "#33a3cc")
 
         seriesTooltip.html()
         seriesTooltip.transition()
@@ -451,7 +451,7 @@ function lineTime(emails, movingMeanWindow, overrideWindow) {
     timeGraph.append('path')
         .attr('id', 'lineplot')
         .attr('d', linePlotFunc(cleanedData) )
-        .attr('stroke', color(3))
+        .attr('stroke', "#33a3cc")
         .attr('fill', 'none')
         .style('stroke-width', 1.5)
 
@@ -492,7 +492,7 @@ $("#colorpicker").spectrum({
     showInput: true,
     showInitial: true,
     preferredFormat: "hex",
-    color: "#6b486b"
+    color: "#33a3cc"
 });
 
 $("#colorpicker").on('change.spectrum', function(e, tinycolor) {
