@@ -18,14 +18,15 @@ var width = 900 - margin.left - margin.right,
 datafile = urlObject().parameters.csv_file + '?nocache=' + (new Date()).getTime()
 
 d3.csv(datafile, function(data) {
-    var emails = data
+    // need emails to be global for function that redraws line
+    emails = data
 
     // filter out emails with missing date headers
     // (which is a thing that happens)
     emails = sanitizeEmails(emails)
     pieByDays(emails)
     seriesTime(emails)
-    lineTime(emails)
+    lineTime(emails, 4, false)
 })
 
 //                                 o8o  
@@ -329,7 +330,7 @@ function seriesTime(emails) {
 
 }
 
-function lineTime(emails) {
+function lineTime(emails, movingMeanWindow, overrideWindow) {
 
     // oooo   o8o                        
     // `888   `"'                        
@@ -377,20 +378,25 @@ function lineTime(emails) {
 
     // implement moving mean
     var movingMean = []
-    var movingMeanWindow = 4
     var smooth = false
-
-    if (cleanedData.length > 400 && cleanedData.length < 1000) {
+    if (overrideWindow == true) {
         smooth = true
-    } else if (cleanedData.length > 1000 && cleanedData.length < 3000) {
-        smooth = true
-        movingMeanWindow = 6
-    } else if (cleanedData.length > 3000) {
-        smooth = true
-        movingMeanWindow = 6
+    } else {
+        if (cleanedData.length > 400 && cleanedData.length < 1000) {
+            smooth = true
+        } else if (cleanedData.length > 1000 && cleanedData.length < 3000) {
+            smooth = true
+            movingMeanWindow = 6
+        } else if (cleanedData.length > 3000) {
+            smooth = true
+            movingMeanWindow = 6
+        }
     }
 
     if (smooth == true) {
+        // display value of moving mean to user
+        document.getElementById('smoothingwindow').value = movingMeanWindow
+
         // create a moving mean array from cleanedData
         for (var ii = 0; ii <= cleanedData.length; ii++)
         {
@@ -466,6 +472,19 @@ d3.select('#savePieTime').on('click', function() {
 
 d3.select('#saveTimeSeries').on('click', function() {
 	saveSvgAsPng(document.getElementById('timeseriesSVG'), 'email_time_series.png')
+})
+
+
+d3.select('#redrawLine').on('click', function() {
+    var newWindow = document.getElementById('smoothingwindow').value
+
+    if (newWindow < 0 || newWindow == "") {
+        d3.select('#windowwarning').text("value must be a positive integer")
+    } else {
+        d3.select('#windowwarning').text("")
+        d3.select('#lineGraph').remove()
+        lineTime(emails, newWindow, true)
+    }
 })
 
 // Initialize color picker and act on color changes

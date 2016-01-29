@@ -33,8 +33,15 @@
 	<h2>Time series/scatterplot of messages by date and time of day</h2>
 
 	Choose your color: <input type="text" id="colorpicker" />
+	<p />
+
+	Size of moving mean window (set to 1 to disable): <input type="number" min="1" max="40" id="smoothingwindow" value="1" style="width: 3em;" />
+
+	<button id="redrawLine">Redraw Line</button>
+	<span style="color: red; font-size: 10px;" id="windowwarning"></span>
+	<p />
 	
-	<button id="saveTimeSeries">Save as Image</button>
+	<button id="saveTimeSeries">Save as Image</button> 
 	
 	<div id="timeseries"></div>
 
