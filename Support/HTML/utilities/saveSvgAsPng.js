@@ -1,18 +1,34 @@
 (function() {
-  var out$ = typeof exports != 'undefined' && exports || this;
+  var out$ = typeof exports != 'undefined' && exports || typeof define != 'undefined' && {} || this;
 
-  var doctype = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+  var doctype = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [<!ENTITY nbsp "&#160;">]>';
+
+  function isElement(obj) {
+    return obj instanceof HTMLElement || obj instanceof SVGElement;
+  }
+
+  function requireDomNode(el) {
+    if (!isElement(el)) {
+      throw new Error('an HTMLElement or SVGElement is required; got ' + el);
+    }
+  }
 
   function isExternal(url) {
     return url && url.lastIndexOf('http',0) == 0 && url.lastIndexOf(window.location.host) == -1;
   }
 
   function inlineImages(el, callback) {
-    var images = el.querySelectorAll('image');
-    var left = images.length;
-    if (left == 0) {
-      callback();
-    }
+    requireDomNode(el);
+
+    var images = el.querySelectorAll('image'),
+        left = images.length,
+        checkDone = function() {
+          if (left === 0) {
+            callback();
+          }
+        };
+
+    checkDone();
     for (var i = 0; i < images.length; i++) {
       (function(image) {
         var href = image.getAttributeNS("http://www.w3.org/1999/xlink", "href");
@@ -26,23 +42,24 @@
         var ctx = canvas.getContext('2d');
         var img = new Image();
         href = href || image.getAttribute('href');
-        img.src = href;
-        img.onload = function() {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          image.setAttributeNS("http://www.w3.org/1999/xlink", "href", canvas.toDataURL('image/png'));
-          left--;
-          if (left == 0) {
-            callback();
+        if (href) {
+          img.src = href;
+          img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            image.setAttributeNS("http://www.w3.org/1999/xlink", "href", canvas.toDataURL('image/png'));
+            left--;
+            checkDone();
           }
-        }
-        img.onerror = function() {
-          console.log("Could not load "+href);
-          left--;
-          if (left == 0) {
-            callback();
+          img.onerror = function() {
+            console.log("Could not load "+href);
+            left--;
+            checkDone();
           }
+        } else {
+          left--;
+          checkDone();
         }
       })(images[i]);
     }
@@ -63,12 +80,22 @@
         for (var j = 0; j < rules.length; j++) {
           var rule = rules[j];
           if (typeof(rule.style) != "undefined") {
-            var match = null;
+            var match, selectorText;
+
             try {
-              match = el.querySelector(rule.selectorText);
+              selectorText = rule.selectorText;
             } catch(err) {
-              console.warn('Invalid CSS selector "' + rule.selectorText + '"', err);
+              console.warn('The following CSS rule has an invalid selector: "' + rule + '"', err);
             }
+
+            try {
+              if (selectorText) {
+                match = el.querySelector(selectorText);
+              }
+            } catch(err) {
+              console.warn('Invalid CSS selector "' + selectorText + '"', err);
+            }
+
             if (match) {
               var selector = selectorRemap ? selectorRemap(rule.selectorText) : rule.selectorText;
               css += selector + " { " + rule.style.cssText + " }\n";
@@ -83,7 +110,7 @@
   }
 
   function getDimension(el, clone, dim) {
-    var v = (el.viewBox.baseVal && el.viewBox.baseVal[dim]) ||
+    var v = (el.viewBox && el.viewBox.baseVal && el.viewBox.baseVal[dim]) ||
       (clone.getAttribute(dim) !== null && !clone.getAttribute(dim).match(/%$/) && parseInt(clone.getAttribute(dim))) ||
       el.getBoundingClientRect()[dim] ||
       parseInt(clone.style[dim]) ||
@@ -101,8 +128,11 @@
   }
 
   out$.svgAsDataUri = function(el, options, cb) {
+    requireDomNode(el);
+
     options = options || {};
     options.scale = options.scale || 1;
+    options.responsive = options.responsive || false;
     var xmlns = "http://www.w3.org/2000/xmlns/";
 
     inlineImages(el, function() {
@@ -127,16 +157,35 @@
       }
 
       clone.setAttribute("version", "1.1");
-      clone.setAttributeNS(xmlns, "xmlns", "http://www.w3.org/2000/svg");
-      clone.setAttributeNS(xmlns, "xmlns:xlink", "http://www.w3.org/1999/xlink");
-      clone.setAttribute("width", width * options.scale);
-      clone.setAttribute("height", height * options.scale);
+      if (!clone.getAttribute('xmlns')) {
+        clone.setAttributeNS(xmlns, "xmlns", "http://www.w3.org/2000/svg");
+      }
+      if (!clone.getAttribute('xmlns:xlink')) {
+        clone.setAttributeNS(xmlns, "xmlns:xlink", "http://www.w3.org/1999/xlink");
+      }
+
+      if (options.responsive) {
+        clone.removeAttribute('width');
+        clone.removeAttribute('height');
+        clone.setAttribute('preserveAspectRatio', 'xMinYMin meet');
+      } else {
+        clone.setAttribute("width", width * options.scale);
+        clone.setAttribute("height", height * options.scale);
+      }
+
       clone.setAttribute("viewBox", [
         options.left || 0,
         options.top || 0,
         width,
         height
       ].join(" "));
+
+      var fos = clone.querySelectorAll('foreignObject > *');
+      for (var i = 0; i < fos.length; i++) {
+        if (!fos[i].getAttributeNS('xml', 'xmlns')) {
+          fos[i].setAttributeNS(xmlns, "xmlns", "http://www.w3.org/1999/xhtml");
+        }
+      }
 
       outer.appendChild(clone);
 
@@ -157,6 +206,11 @@
   }
 
   out$.svgAsPngUri = function(el, options, cb) {
+    requireDomNode(el);
+
+    options.encoderType = options.encoderType || 'image/png';
+    options.encoderOptions = options.encoderOptions || 0.8;
+
     out$.svgAsDataUri(el, options, function(uri) {
       var image = new Image();
       image.onload = function() {
@@ -171,9 +225,9 @@
         context.drawImage(image, 0, 0);
         var a = document.createElement('a'), png;
         try {
-          png = canvas.toDataURL('image/png');
+          png = canvas.toDataURL(options.encoderType, options.encoderOptions);
         } catch (e) {
-          if (e instanceof SecurityError) {
+          if ((typeof SecurityError !== 'undefined' && e instanceof SecurityError) || e.name == "SecurityError") {
             console.error("Rendered SVG images cannot be downloaded in this browser.");
             return;
           } else {
@@ -182,21 +236,48 @@
         }
         cb(png);
       }
+      image.onerror = function() {
+        console.error(
+          'There was an error loading the data URI as an image on the following SVG\n',
+          window.atob(uri.slice(26)), '\n',
+          "Open the following link to see browser's diagnosis\n",
+          uri);
+      }
       image.src = uri;
     });
   }
 
+  function download(name, uri) {
+    var a = document.createElement('a');
+    a.download = name;
+    a.href = uri;
+    document.body.appendChild(a);
+    a.click();
+    a.parentNode.removeChild(a);
+  }
+
+  out$.saveSvg = function(el, name, options) {
+    requireDomNode(el);
+
+    options = options || {};
+    out$.svgAsDataUri(el, options, function(uri) {
+      download(name, uri);
+    });
+  }
+
   out$.saveSvgAsPng = function(el, name, options) {
+    requireDomNode(el);
+
     options = options || {};
     out$.svgAsPngUri(el, options, function(uri) {
-      var a = document.createElement('a');
-      a.download = name;
-      a.href = uri;
-      document.body.appendChild(a);
-      a.addEventListener("click", function(e) {
-        a.parentNode.removeChild(a);
-      });
-      a.click();
+      download(name, uri);
+    });
+  }
+
+  // if define is defined create as an AMD module
+  if (typeof define !== 'undefined') {
+    define(function() {
+      return out$;
     });
   }
 })();
