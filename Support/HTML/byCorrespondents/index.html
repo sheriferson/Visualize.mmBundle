@@ -19,5 +19,25 @@
 
 Correspondents are all non-user addresses. i.e., they are addresses that do not match your email as MailMate knows it.
 
+<p>Hover over the piechart and bar plot for more information.</p>
+
+<h2>Pie chart of messages by sender</h2>
+<button id="savePie">Save as Image</button>
+<div id="pieBySender"></div>
+
+<h2>Bar chart of messages by correspondent</h2>
+
+<div id="excludedSenders"></div><p />
+
+<button id="saveBar">Save as Image</button>
+<div id="barBySender"></div>
+
+<script type="text/javascript" src=""></script>
+
+<script>
+document.write("<script type='text/javascript' src='byCorrespondents.js?v=" + 
+	                       Date.now() + "'><\/script>");
+</script>
+
 </body>
 </html>

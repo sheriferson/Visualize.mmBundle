@@ -4,8 +4,8 @@
 	keyEquivalent = "^c";
 	uuid          = '5D36DE69-0233-41B6-A148-896D020500BD';
 
-	formatString  = '${#recipient.name}: ${#recipient.address}';
-	separatorString = '\n';
+    formatString = '"${#recipient.name:${#recipient.address}}"';
+    separatorString = '\n';
 	executionMode = 'multipleMessages';
 	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display-correspondents" byCorrespondents\n';
 }
