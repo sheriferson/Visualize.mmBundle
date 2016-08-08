@@ -24,7 +24,11 @@ You can install this bundle in MailMate by opening the preferences and going to 
 
 Select a few - or many! - messages in any folder or in your Inbox.
 
-Then invoke "Emails by sender" or "Emails by time" from the Command > Visualize menu, or using the "^B" or "^T" shortcuts respectively.
+With those messages selected, you have access to three visualization commands:
+
+- Emails by correspondents (shortcut: `^c`)
+- Emails by sender (shortcut: `^b`)
+- Emails by time (shortcut: `^t`)
 
 The plots will then be displayed in Safari.
 
