@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="../style.css">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script>
+		if (typeof d3 === "undefined") {
+			document.write('<script src="../utilities/d3.min.js">\x3C/script>')
+		}
+	</script>
+	<script src="../utilities/saveSvgAsPng.js"></script>
+	<script src="../utilities/url_object.js"></script>
+	<title>Your email visualized by tag</title>
+</head>
+<body>
+	
+	<h1>Glances at your email</h1>
+
+	<p>Hover over the piechart and bar plot for more information.</p>
+
+	<h2>Pie chart of messages by tag</h2>
+	<button id="savePie">Save as Image</button>
+	<div id="pieByTag"></div>
+
+	<h2>Bar chart of messages by tag</h2>
+
+	<div id="excludedTags"></div><p />
+
+	<button id="saveBar">Save as Image</button>
+	<div id="barByTag"></div>
+
+	<script type="text/javascript" src=""></script>
+
+	<!-- reference http://stackoverflow.com/a/11467981 -->
+	<script>
+	document.write("<script type='text/javascript' src='byTag.js?v=" + 
+	                       Date.now() + "'><\/script>");
+	</script>
+	
+</body>
+</html>

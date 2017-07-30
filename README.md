@@ -8,6 +8,8 @@ Visualize email history and trends.
 
 ![Scatterplot of selected emails over time](screenshots/by_time_scatterplot.png)
 
+![Bar chart of selected emails by tag](screenshots/by_tag_bar_chart.png)
+
 You can change colors.
 
 ![Different color](screenshots/by_time_scatterplot_pink.png)
@@ -24,11 +26,12 @@ You can install this bundle in MailMate by opening the preferences and going to 
 
 Select a few - or many! - messages in any folder or in your Inbox.
 
-With those messages selected, you have access to three visualization commands:
+With those messages selected, you have access to four visualization commands:
 
 - Emails by correspondents (shortcut: `^c`)
 - Emails by sender (shortcut: `^b`)
 - Emails by time (shortcut: `^t`)
+- Emails by tag (shortcut: `^g`)
 
 The plots will then be displayed in Safari.
 

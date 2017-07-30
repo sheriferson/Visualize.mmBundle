@@ -1,0 +1,10 @@
+{
+	name          = 'Emails by tag';
+	input         = 'formatted';
+	keyEquivalent = "^g";
+	uuid          = '82B369F4-7281-4C55-93C3-71779ACBB439';
+
+	formatString  = '"${from.name:?${from.name/"/""/g}:${from.address/"/""/g}}","${from.address/"/""/g}","${subject/"/""/g}","${#mailer.name/"/""/g}",${##tags.tag.#name},1';
+	executionMode = 'multipleMessages';
+	command       = '#!/bin/bash\n"${MM_BUNDLE_SUPPORT}/bin/display-tag" byTag\n';
+}
